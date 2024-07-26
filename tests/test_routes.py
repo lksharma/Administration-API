@@ -111,5 +111,41 @@ class TestRoutes(unittest.TestCase):
         self.assertEqual(data['error'], 'Incorrect padding')
         self.client.delete(f'/contents/100')
 
+    def test_decrypt_content(self):
+        response = self.client.get(f'/decrypt/content/{self.content_id}/device/{self.device.id}')
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertIn('decrypted_payload', data)
+        self.assertEqual(data['decrypted_payload'], "This is a sample payload.")
+
+    def test_decrypt_content_invalid_device(self):
+        response = self.client.get(f'/decrypt/content/{self.content_id}/device/999')
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data)
+        self.assertIn('error', data)
+        self.assertEqual(data['error'], 'Device not found')
+
+    def test_decrypt_content_invalid_content(self):
+        response = self.client.get(f'/decrypt/content/999/device/{self.device.id}')
+        self.assertEqual(response.status_code, 404)
+        data = json.loads(response.data)
+        self.assertIn('error', data)
+        self.assertEqual(data['error'], 'Content not found')
+
+    def test_decrypt_content_protection_mismatch(self):
+        new_protection_system = ProtectionSystem(name='RSA', encryption_mode='RSA')
+        db.session.add(new_protection_system)
+        db.session.commit()
+        
+        new_device = Device(name='Device2', protection_system=new_protection_system.id)
+        db.session.add(new_device)
+        db.session.commit()
+
+        response = self.client.get(f'/decrypt/content/{self.content_id}/device/{new_device.id}')
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data)
+        self.assertIn('error', data)
+        self.assertEqual(data['error'], 'Protection systems do not match')
+
 if __name__ == '__main__':
     unittest.main()

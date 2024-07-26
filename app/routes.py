@@ -48,6 +48,40 @@ def get_contents():
 
     return jsonify(result)
 
+@app.route('/decrypt/content/<int:content_id>/device/<int:device_id>', methods=['GET'])
+def decrypt_content(content_id, device_id):
+    """
+    Decrypts content based on the device and content identifiers.
+    Validates if the Content Protection System matches the Device Protection System.
+    Returns a JSON response with the decrypted data payload.
+    """
+    device = Device.query.get(device_id)
+    if device is None:
+        return jsonify({'error': 'Device not found'}), 404
+
+    content = Content.query.get(content_id)
+    if content is None:
+        return jsonify({'error': 'Content not found'}), 404
+
+    if device.protection_system != content.protection_system:
+        return jsonify({'error': 'Protection systems do not match'}), 400
+
+    protection_system = ProtectionSystem.query.get(content.protection_system)
+    if protection_system is None:
+        return jsonify({'error': 'Protection system not found'}), 404
+
+    encryption_mode = protection_system.encryption_mode
+    encryption_key = content.encryption_key
+    encrypted_payload = content.encrypted_payload
+
+    try:
+        decrypted_payload = decrypt_data(encryption_mode, encryption_key, encrypted_payload)
+        return jsonify({
+            'decrypted_payload': decrypted_payload
+        })
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+
 @app.route('/contents/<int:content_id>', methods=['GET'])
 def get_content_by_id(content_id):
     """

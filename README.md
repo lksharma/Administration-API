@@ -38,6 +38,12 @@ curl -X POST http://localhost:5000/contents \
     }'
 ```
 
+### Decrypt content by ondent ID and device ID
+
+```
+curl -X GET http://localhost:5000/decrypt/content/<int:content_id>/device/<int:device_id>
+```
+
 ### Retrieve all contents
 ```
 curl http://localhost:5000/contents
@@ -45,12 +51,12 @@ curl http://localhost:5000/contents
 
 ### Retrieve a specific content by ID
 ```
-curl http://localhost:5000/contents/1
+curl http://localhost:5000/contents/<int:content_id>
 ```
 
 ### Update a content by ID
 ```
-curl -X PUT http://localhost:5000/contents/1 \
+curl -X PUT http://localhost:5000/contents/<int:content_id> \
     -H "Content-Type: application/json" \
     -d '{
         "protection_system": 2,
@@ -61,7 +67,5 @@ curl -X PUT http://localhost:5000/contents/1 \
 
 ### Delete a content by ID
 ```
-curl -X DELETE http://localhost:5000/contents/1
+curl -X DELETE http://localhost:5000/contents/<int:content_id>
 ```
-
-### 
