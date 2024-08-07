@@ -1,5 +1,19 @@
 from app import db
 
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+
+
+class UserDevice(db.Model):
+    __tablename__ = 'user_devices'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    device_id = db.Column(db.Integer, db.ForeignKey('devices.id'), nullable=False)
+    user = db.relationship('User')
+    device = db.relationship('Device', back_populates='user_devices')
+
 class Device(db.Model):
     """
     Represents a device with an associated protection system.

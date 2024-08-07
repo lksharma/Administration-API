@@ -3,6 +3,13 @@ from app import app, db
 from app.models import Content, Device, ProtectionSystem
 from utils.encryption import encrypt_data, decrypt_data
 
+@app.route('/users', methods=['GET'])
+def get_users():
+    users = User.query.all()
+
+    result = [{'id': user.id, 'name': user.name} for user in users]
+    return jsonify(result)
+
 @app.route('/health', methods=['GET'])
 def health_check():
     """
